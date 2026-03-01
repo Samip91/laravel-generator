@@ -1,0 +1,71 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ uses }}
+
+class {{ controllerClass }} extends Controller
+{
+    protected {{ class }}Service $service;
+
+    public function __construct({{ class }}Service $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): JsonResponse
+    {
+        ${{ pluralVariable }} = $this->service->paginate();
+        
+        return {{ class }}Resource::collection(${{ pluralVariable }})
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Store{{ class }}Request $request): JsonResponse
+    {
+        ${{ modelVariable }} = $this->service->create($request->validated());
+        
+        return (new {{ class }}Resource(${{ modelVariable }}))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{ class }} ${{ modelVariable }}): JsonResponse
+    {
+        return (new {{ class }}Resource(${{ modelVariable }}))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Update{{ class }}Request $request, {{ class }} ${{ modelVariable }}): JsonResponse
+    {
+        $this->service->update(${{ modelVariable }}, $request->validated());
+        
+        return (new {{ class }}Resource(${{ modelVariable }}->fresh()))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{ class }} ${{ modelVariable }}): JsonResponse
+    {
+        $this->service->delete(${{ modelVariable }});
+        
+        return response()->json(null, 204);
+    }
+}

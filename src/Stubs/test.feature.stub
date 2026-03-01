@@ -1,0 +1,12 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ uses }}
+
+class {{ testClass }} extends TestCase
+{
+    use RefreshDatabase;
+
+    {{ testMethods }}
+}

@@ -1,0 +1,28 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Edit {{ class }}</h1>
+            <a href="{{ route('{{ kebabName }}.show', ${{ variable }}) }}" class="text-blue-600 hover:text-blue-800">
+                ← Back to {{ class }}
+            </a>
+        </div>
+
+        <div class="bg-white shadow rounded-lg p-6">
+            <form action="{{ route('{{ kebabName }}.update', ${{ variable }}) }}" method="POST">
+                @csrf
+                @method('PUT')
+                @include('{{ kebabName }}._form')
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Update {{ class }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

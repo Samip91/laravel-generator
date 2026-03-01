@@ -1,0 +1,29 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ uses }}
+
+class {{ class }} extends Model
+{
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = {{ fillable }};
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = {{ casts }};
+
+    /**
+     * Get the table associated with the model.
+     */
+    protected $table = '{{ table }}';
+
+    {{ relationships }}
+
+    {{ scopes }}
+}

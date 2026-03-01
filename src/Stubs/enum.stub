@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ namespace }};
+
+enum {{ enumClass }}: string
+{
+    {{ cases }}
+
+    {{ methods }}
+}

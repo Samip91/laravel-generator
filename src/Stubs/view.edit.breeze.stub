@@ -1,0 +1,38 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Edit {{ class }}') }}
+            </h2>
+            <div class="flex space-x-2">
+                <x-secondary-button onclick="window.location.href='{{ route('{{ kebabName }}.show', ${{ variable }}) }}'">
+                    ← {{ __('Back to {{ class }}') }}
+                </x-secondary-button>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <form method="POST" action="{{ route('{{ kebabName }}.update', ${{ variable }}) }}" class="space-y-6">
+                        @csrf
+                        @method('PUT')
+                        @include('{{ kebabName }}._form')
+                        
+                        <div class="flex items-center justify-end">
+                            <x-secondary-button type="button" onclick="window.location.href='{{ route('{{ kebabName }}.show', ${{ variable }}) }}'" class="mr-3">
+                                {{ __('Cancel') }}
+                            </x-secondary-button>
+                            
+                            <x-primary-button>
+                                {{ __('Update {{ class }}') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

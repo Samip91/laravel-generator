@@ -1,0 +1,82 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ uses }}
+
+class {{ serviceClass }}
+{
+    /**
+     * Get paginated {{ pluralName }}.
+     */
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return {{ class }}::paginate($perPage);
+    }
+
+    /**
+     * Get all {{ pluralName }}.
+     */
+    public function all(): Collection
+    {
+        return {{ class }}::all();
+    }
+
+    /**
+     * Find {{ singularName }} by ID.
+     */
+    public function findById(int $id): ?{{ class }}
+    {
+        return {{ class }}::find($id);
+    }
+
+    /**
+     * Create a new {{ singularName }}.
+     */
+    public function create(array $data): {{ class }}
+    {
+        return {{ class }}::create($data);
+    }
+
+    /**
+     * Update the specified {{ singularName }}.
+     */
+    public function update({{ class }} ${{ modelVariable }}, array $data): {{ class }}
+    {
+        ${{ modelVariable }}->update($data);
+        
+        return ${{ modelVariable }}->fresh();
+    }
+
+    /**
+     * Delete the specified {{ singularName }}.
+     */
+    public function delete({{ class }} ${{ modelVariable }}): bool
+    {
+        return ${{ modelVariable }}->delete();
+    }
+
+    /**
+     * Find {{ singularName }} by multiple criteria.
+     */
+    public function findBy(array $criteria): Collection
+    {
+        $query = {{ class }}::query();
+
+        foreach ($criteria as $field => $value) {
+            $query->where($field, $value);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Search {{ pluralName }} by keyword.
+     */
+    public function search(string $keyword): Collection
+    {
+        return {{ class }}::where('name', 'LIKE', "%{$keyword}%")
+            ->orWhere('description', 'LIKE', "%{$keyword}%")
+            ->get();
+    }
+}
