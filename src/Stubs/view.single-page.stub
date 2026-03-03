@@ -173,41 +173,12 @@
     </div>
 </div>
 
-<!-- Include jQuery for AJAX -->
+@push('styles')
+<link href="{{ asset('vendor/laravel-generator/css/laravel-generator-modals.css') }}" rel="stylesheet">
+@endpush
+
+@push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-{{ dialogCSS }}
-{{ alertScript }}
-{{ crudScript }}
-
-<style>
-/* Animation for modals */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(-50px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-in {
-    animation: slideIn 0.3s ease-out;
-}
-
-/* Custom scrollbar for modals */
-.overflow-y-auto::-webkit-scrollbar {
-    width: 8px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-</style>
+<script src="{{ asset('vendor/laravel-generator/js/laravel-generator-crud.js') }}"></script>
+@endpush
 @endsection

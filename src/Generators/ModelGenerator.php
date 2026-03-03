@@ -193,6 +193,7 @@ class ModelGenerator extends BaseGenerator
     protected function buildScopes(): string
     {
         $scopes = [];
+        $generatedScopes = []; // Track generated scope names to avoid duplicates
         $fields = $this->parseFields();
 
         // Add common scopes based on field types
@@ -200,12 +201,21 @@ class ModelGenerator extends BaseGenerator
             if ($field['type'] === 'enum') {
                 foreach ($field['options'] as $option) {
                     $scopeName = 'scope'.Str::studly($option);
-                    $scopes[] = "public function {$scopeName}(\$query)\n    {\n        return \$query->where('{$field['name']}', '{$option}');\n    }";
+                    // Only add if not already generated
+                    if (!in_array($scopeName, $generatedScopes)) {
+                        $scopes[] = "public function {$scopeName}(\$query)\n    {\n        return \$query->where('{$field['name']}', '{$option}');\n    }";
+                        $generatedScopes[] = $scopeName;
+                    }
                 }
             }
 
             if ($field['name'] === 'status') {
-                $scopes[] = "public function scopeActive(\$query)\n    {\n        return \$query->where('status', 'active');\n    }";
+                $scopeName = 'scopeActive';
+                // Only add if not already generated
+                if (!in_array($scopeName, $generatedScopes)) {
+                    $scopes[] = "public function {$scopeName}(\$query)\n    {\n        return \$query->where('status', 'active');\n    }";
+                    $generatedScopes[] = $scopeName;
+                }
             }
         }
 

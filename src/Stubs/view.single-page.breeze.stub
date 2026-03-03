@@ -189,7 +189,12 @@
         </div>
     </x-modal>
 
-    {{ dialogCSS }}
-    {{ alertScript }}
-    {{ crudScript }}
+    @push('styles')
+    <link href="{{ asset('vendor/laravel-generator/css/laravel-generator-modals.css') }}" rel="stylesheet">
+    @endpush
+
+    @push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('vendor/laravel-generator/js/laravel-generator-crud.js') }}"></script>
+    @endpush
 </x-app-layout>

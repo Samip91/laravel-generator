@@ -1,0 +1,291 @@
+/**
+ * Laravel Generator Modal Styles
+ * CSS for CRUD modals and animations
+ */
+
+/* Modal animations */
+@keyframes slideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-50px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal container animations */
+.animate-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-in > div {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+    transition: backdrop-filter 0.3s ease;
+}
+
+/* Modal content */
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for modals */
+.modal-content::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Firefox scrollbar styling */
+.modal-content,
+.overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+/* Modal form elements */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Form field animations */
+.form-field {
+    transition: all 0.3s ease;
+}
+
+.form-field:focus-within {
+    transform: translateY(-2px);
+}
+
+/* Input field enhancements */
+.modal-input {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.modal-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.modal-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Button animations */
+.modal-button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.modal-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Loading state */
+.modal-button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alert styles */
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    animation: slideUp 0.3s ease-out;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    border: 1px solid #22c55e;
+    color: #15803d;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    border: 1px solid #ef4444;
+    color: #dc2626;
+}
+
+.alert-warning {
+    background-color: #fffbeb;
+    border: 1px solid #f59e0b;
+    color: #d97706;
+}
+
+.alert-info {
+    background-color: #eff6ff;
+    border: 1px solid #3b82f6;
+    color: #2563eb;
+}
+
+/* Table enhancements */
+.crud-table {
+    transition: all 0.3s ease;
+}
+
+.crud-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.crud-table tr:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Action button styling */
+.action-button {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.action-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.05);
+}
+
+.action-button.view {
+    color: #3b82f6;
+}
+
+.action-button.edit {
+    color: #22c55e;
+}
+
+.action-button.delete {
+    color: #ef4444;
+}
+
+/* Search input enhancements */
+.search-input {
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        max-height: 95vh;
+    }
+    
+    .animate-in > div {
+        animation: slideUp 0.3s ease-out;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    .modal-content::-webkit-scrollbar-track,
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: #374151;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb,
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #6b7280;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb:hover,
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+}
+
+/* Focus trap for accessibility */
+.modal-open {
+    overflow: hidden;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .modal-button {
+        border: 2px solid currentColor;
+    }
+    
+    .alert {
+        border-width: 2px;
+    }
+}

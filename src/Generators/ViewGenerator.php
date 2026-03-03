@@ -267,17 +267,17 @@ class ViewGenerator extends BaseGenerator
     protected function buildTableHeaders(): string
     {
         $fields = $this->parseFields();
-        $headers = ['<th>ID</th>'];
+        $headers = ['<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>'];
 
         foreach ($fields as $field) {
             if (!in_array($field['name'], ['id', 'created_at', 'updated_at'])) {
                 $label = Str::title(str_replace('_', ' ', $field['name']));
-                $headers[] = "<th>{$label}</th>";
+                $headers[] = "<th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">{$label}</th>";
             }
         }
 
-        $headers[] = '<th>Created At</th>';
-        $headers[] = '<th>Actions</th>';
+        $headers[] = '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>';
+        $headers[] = '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>';
 
         return implode("\n                ", $headers);
     }
@@ -288,19 +288,23 @@ class ViewGenerator extends BaseGenerator
     protected function buildTableRows(): string
     {
         $fields = $this->parseFields();
-        $rows = ['<td>{{ $'.$this->getCamelName().'->id }}</td>'];
+        $rows = ['<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $'.$this->getCamelName().'->id }}</td>'];
 
         foreach ($fields as $field) {
             if (!in_array($field['name'], ['id', 'created_at', 'updated_at'])) {
                 if ($field['type'] === 'enum') {
-                    $rows[] = '<td>{{ $'.$this->getCamelName().'->'.$field['name'].'?->label() ?? \'N/A\' }}</td>';
+                    $rows[] = '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $'.$this->getCamelName().'->'.$field['name'].'?->label() ?? \'N/A\' }}</td>';
+                } elseif ($field['type'] === 'foreign' || Str::endsWith($field['name'], '_id')) {
+                    // Foreign key field - show related model name
+                    $relationName = Str::beforeLast($field['name'], '_id');
+                    $rows[] = '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $'.$this->getCamelName().'->'.$relationName.'->name ?? $'.$this->getCamelName().'->'.$relationName.'->title ?? $'.$this->getCamelName().'->'.$field['name'].' ?? \'N/A\' }}</td>';
                 } else {
-                    $rows[] = '<td>{{ $'.$this->getCamelName().'->'.$field['name'].' }}</td>';
+                    $rows[] = '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $'.$this->getCamelName().'->'.$field['name'].' }}</td>';
                 }
             }
         }
 
-        $rows[] = '<td>{{ $'.$this->getCamelName().'->created_at->format(\'Y-m-d H:i\') }}</td>';
+        $rows[] = '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $'.$this->getCamelName().'->created_at->format(\'Y-m-d H:i\') }}</td>';
 
         return implode("\n                ", $rows);
     }
@@ -352,8 +356,13 @@ class ViewGenerator extends BaseGenerator
     {
         $label = Str::title(str_replace('_', ' ', $field['name']));
         $name = $field['name'];
-        $oldValue = "old('{$name}', \${$this->getCamelName()}->{$name} ?? '')";
+        $oldValue = "old('{$name}', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : '')";
         $required = $field['nullable'] ? '' : ' required';
+
+        // Detect foreign key fields
+        if ($field['type'] === 'foreign' || Str::endsWith($field['name'], '_id')) {
+            $field['type'] = 'foreign';
+        }
 
         if ($this->framework['name'] === 'breeze') {
             return $this->buildBreezeFormField($field, $label, $name, $oldValue, $required);
@@ -361,45 +370,60 @@ class ViewGenerator extends BaseGenerator
 
         return match($field['type']) {
             'text' => '<div class="mb-4">
-        <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
-        <textarea id="'.$name.'" name="'.$name.'" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>{{ '.$oldValue.' }}</textarea>
-        @error(\''.$name.'\')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>',
+    <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
+    <textarea id="'.$name.'" name="'.$name.'" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>{{ '.$oldValue.' }}</textarea>
+    @error(\''.$name.'\')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>',
             
             'boolean' => '<div class="mb-4">
-        <div class="flex items-center">
-            <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded border-gray-300 shadow-sm" {{ old(\''.$name.'\', \${$this->getCamelName()}->{$name} ?? false) ? \'checked\' : \'\' }}>
-            <label for="'.$name.'" class="ml-2 block text-sm text-gray-900">'.$label.'</label>
-        </div>
-        @error(\''.$name.'\')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>',
+    <div class="flex items-center">
+        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded border-gray-300 shadow-sm" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : false) ? \'checked\' : \'\' }}>
+        <label for="'.$name.'" class="ml-2 block text-sm text-gray-900">'.$label.'</label>
+    </div>
+    @error(\''.$name.'\')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>',
 
             'enum' => '<div class="mb-4">
-        <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
-        <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
-            <option value="">Select '.$label.'</option>
-            @foreach(\\App\\Enums\\'.Str::studly($name).'Enum::cases() as $case)
-                <option value="{{ $case->value }}" {{ old(\''.$name.'\', \${$this->getCamelName()}->{$name}?->value) === $case->value ? \'selected\' : \'\' }}>
-                    {{ $case->label() }}
-                </option>
-            @endforeach
-        </select>
-        @error(\''.$name.'\')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>',
+    <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
+    <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
+        <option value="">Select '.$label.'</option>
+        @foreach(\\App\\Enums\\'.Str::studly($name).'Enum::cases() as $case)
+            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
+                {{ $case->label() }}
+            </option>
+        @endforeach
+    </select>
+    @error(\''.$name.'\')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>',
+
+            'foreign' => '<div class="mb-4">
+    <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
+    <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
+        <option value="">Select '.$label.'</option>
+        @foreach(${{ '.Str::camel(Str::plural(Str::beforeLast($name, '_id'))).' }} as $item)
+            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
+                {{ $item->name ?? $item->title ?? $item->id }}
+            </option>
+        @endforeach
+    </select>
+    @error(\''.$name.'\')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>',
 
             default => '<div class="mb-4">
-        <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
-        <input type="text" id="'.$name.'" name="'.$name.'" value="{{ '.$oldValue.' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
-        @error(\''.$name.'\')
-            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-        @enderror
-    </div>'
+    <label for="'.$name.'" class="block text-sm font-medium text-gray-700">'.$label.'</label>
+    <input type="text" id="'.$name.'" name="'.$name.'" value="{{ '.$oldValue.' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
+    @error(\''.$name.'\')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>'
         };
     }
 
@@ -417,7 +441,7 @@ class ViewGenerator extends BaseGenerator
             
             'boolean' => '<div>
     <label for="'.$name.'" class="inline-flex items-center">
-        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" {{ old(\''.$name.'\', \${$this->getCamelName()}->{$name} ?? false) ? \'checked\' : \'\' }}>
+        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : false) ? \'checked\' : \'\' }}>
         <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ __(\''.addslashes($label).'\') }}</span>
     </label>
     <x-input-error :messages="$errors->get(\''.$name.'\')" class="mt-2" />
@@ -428,8 +452,21 @@ class ViewGenerator extends BaseGenerator
     <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"'.$required.'>
         <option value="">{{ __(\'Select '.addslashes($label).'\') }}</option>
         @foreach(\\App\\Enums\\'.Str::studly($name).'Enum::cases() as $case)
-            <option value="{{ $case->value }}" {{ old(\''.$name.'\', \${$this->getCamelName()}->{$name}?->value) === $case->value ? \'selected\' : \'\' }}>
+            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
                 {{ $case->label() }}
+            </option>
+        @endforeach
+    </select>
+    <x-input-error :messages="$errors->get(\''.$name.'\')" class="mt-2" />
+</div>',
+
+            'foreign' => '<div>
+    <x-input-label for="'.$name.'" :value="__(\''.addslashes($label).'\')" />
+    <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"'.$required.'>
+        <option value="">{{ __(\'Select '.addslashes($label).'\') }}</option>
+        @foreach(${{ '.Str::camel(Str::plural(Str::beforeLast($name, '_id'))).' }} as $item)
+            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
+                {{ $item->name ?? $item->title ?? $item->id }}
             </option>
         @endforeach
     </select>

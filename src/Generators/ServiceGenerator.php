@@ -37,6 +37,7 @@ class ServiceGenerator extends BaseGenerator
         
         $variables['{{ serviceClass }}'] = $this->getClassName().'Service';
         $variables['{{ uses }}'] = $this->buildUses();
+        $variables['{{ withRelations }}'] = $this->buildWithRelations();
         
         return $variables;
     }
@@ -53,5 +54,27 @@ class ServiceGenerator extends BaseGenerator
         ];
 
         return implode("\n", $uses);
+    }
+
+    /**
+     * Build with relations clause for queries.
+     */
+    protected function buildWithRelations(): string
+    {
+        $fields = $this->parseFields();
+        $relations = [];
+
+        foreach ($fields as $field) {
+            if ($field['type'] === 'foreign' || str_ends_with($field['name'], '_id')) {
+                $relationName = str_replace('_id', '', $field['name']);
+                $relations[] = "'".$relationName."'";
+            }
+        }
+
+        if (empty($relations)) {
+            return '';
+        }
+
+        return 'with(['.implode(', ', $relations).'])->';
     }
 }

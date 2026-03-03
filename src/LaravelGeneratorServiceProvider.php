@@ -37,6 +37,18 @@ class LaravelGeneratorServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/Stubs' => resource_path('stubs/laravel-generator'),
             ], 'laravel-generator-stubs');
+
+            // Publish assets
+            $this->publishes([
+                __DIR__.'/../resources/js' => public_path('vendor/laravel-generator/js'),
+                __DIR__.'/../resources/css' => public_path('vendor/laravel-generator/css'),
+            ], 'laravel-generator-assets');
+
+            // Publish dev assets (for Vite bundling)
+            $this->publishes([
+                __DIR__.'/../resources/js' => resource_path('js/vendor/laravel-generator'),
+                __DIR__.'/../resources/css' => resource_path('css/vendor/laravel-generator'),
+            ], 'laravel-generator-dev-assets');
         }
     }
 

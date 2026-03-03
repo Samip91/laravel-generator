@@ -127,7 +127,7 @@ abstract class BaseGenerator implements GeneratorInterface
      */
     protected function getPluralName(): string
     {
-        return $this->name;
+        return Str::plural($this->getSingularName());
     }
 
     /**
@@ -212,7 +212,7 @@ abstract class BaseGenerator implements GeneratorInterface
             '{{ class }}' => $this->getClassName(),
             '{{ pluralClass }}' => $this->getPluralClassName(),
             '{{ variable }}' => $this->getCamelName(),
-            '{{ pluralVariable }}' => Str::camel($this->name),
+            '{{ pluralVariable }}' => Str::camel($this->getPluralName()),
             '{{ model }}' => $this->getClassName(),
             '{{ modelVariable }}' => $this->getCamelName(),
             '{{ table }}' => $this->getSnakeName(),

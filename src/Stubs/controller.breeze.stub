@@ -10,7 +10,6 @@ class {{ controllerClass }} extends Controller
 
     public function __construct({{ class }}Service $service)
     {
-        $this->middleware('auth');
         $this->service = $service;
     }
 
@@ -29,7 +28,8 @@ class {{ controllerClass }} extends Controller
      */
     public function create(): View
     {
-        return view('{{ kebabName }}.create');
+        {{ createViewData }}
+        return view('{{ kebabName }}.create'{{ createCompact }});
     }
 
     /**
@@ -57,7 +57,8 @@ class {{ controllerClass }} extends Controller
      */
     public function edit({{ class }} ${{ modelVariable }}): View
     {
-        return view('{{ kebabName }}.edit', compact('{{ modelVariable }}'));
+        {{ editViewData }}
+        return view('{{ kebabName }}.edit', compact('{{ modelVariable }}'{{ editCompact }}));
     }
 
     /**

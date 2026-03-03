@@ -51,6 +51,10 @@ class ControllerGenerator extends BaseGenerator
         
         $variables['{{ uses }}'] = $this->buildUses();
         $variables['{{ controllerClass }}'] = $this->getClassName().'Controller';
+        $variables['{{ createViewData }}'] = $this->buildCreateViewData();
+        $variables['{{ editViewData }}'] = $this->buildEditViewData();
+        $variables['{{ createCompact }}'] = $this->buildCreateCompact();
+        $variables['{{ editCompact }}'] = $this->buildEditCompact();
         
         return $variables;
     }
@@ -77,5 +81,79 @@ class ControllerGenerator extends BaseGenerator
         }
 
         return implode("\n", $uses);
+    }
+
+    /**
+     * Build view data for create method.
+     */
+    protected function buildCreateViewData(): string
+    {
+        $fields = $this->parseFields();
+        $viewData = [];
+
+        foreach ($fields as $field) {
+            if ($field['type'] === 'foreign' || str_ends_with($field['name'], '_id')) {
+                $relationName = str_replace('_id', '', $field['name']);
+                $modelName = ucfirst($relationName);
+                $pluralName = \Illuminate\Support\Str::camel(\Illuminate\Support\Str::plural($relationName));
+                $viewData[] = '$'.$pluralName.' = \\App\\Models\\'.$modelName.'::all();';
+            }
+        }
+
+        return empty($viewData) ? '' : implode("\n        ", $viewData);
+    }
+
+    /**
+     * Build view data for edit method.
+     */
+    protected function buildEditViewData(): string
+    {
+        return $this->buildCreateViewData();
+    }
+
+    /**
+     * Build compact array for create method.
+     */
+    protected function buildCreateCompact(): string
+    {
+        $fields = $this->parseFields();
+        $compactVars = [];
+
+        foreach ($fields as $field) {
+            if ($field['type'] === 'foreign' || str_ends_with($field['name'], '_id')) {
+                $relationName = str_replace('_id', '', $field['name']);
+                $pluralName = \Illuminate\Support\Str::camel(\Illuminate\Support\Str::plural($relationName));
+                $compactVars[] = "'".$pluralName."'";
+            }
+        }
+
+        if (empty($compactVars)) {
+            return '';
+        }
+
+        return ', compact('.implode(', ', $compactVars).')';
+    }
+
+    /**
+     * Build compact array for edit method.
+     */
+    protected function buildEditCompact(): string
+    {
+        $fields = $this->parseFields();
+        $compactVars = [];
+
+        foreach ($fields as $field) {
+            if ($field['type'] === 'foreign' || str_ends_with($field['name'], '_id')) {
+                $relationName = str_replace('_id', '', $field['name']);
+                $pluralName = \Illuminate\Support\Str::camel(\Illuminate\Support\Str::plural($relationName));
+                $compactVars[] = "'".$pluralName."'";
+            }
+        }
+
+        if (empty($compactVars)) {
+            return '';
+        }
+
+        return ', '.implode(', ', $compactVars);
     }
 }

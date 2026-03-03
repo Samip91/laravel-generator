@@ -152,7 +152,7 @@ class UIFrameworkDetector
     /**
      * Get authentication middleware.
      */
-    public function getAuthMiddleware(): string
+    public function getAuthMiddleware(): ?string
     {
         return $this->hasAuthentication() ? 'auth' : null;
     }
