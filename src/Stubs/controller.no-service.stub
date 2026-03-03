@@ -1,0 +1,80 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ uses }}
+
+class {{ controllerClass }} extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): View
+    {
+        ${{ pluralVariable }} = {{ class }}::paginate(15);
+        
+        return view('{{ kebabName }}.index', compact('{{ pluralVariable }}'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
+    {
+        {{ createViewData }}
+        return view('{{ kebabName }}.create'{{ createCompact }});
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Store{{ class }}Request $request): RedirectResponse
+    {
+        ${{ modelVariable }} = {{ class }}::create($request->validated());
+        
+        return redirect()
+            ->route('{{ kebabName }}.show', ${{ modelVariable }})
+            ->with('success', '{{ class }} created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{ class }} ${{ modelVariable }}): View
+    {
+        return view('{{ kebabName }}.show', compact('{{ modelVariable }}'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit({{ class }} ${{ modelVariable }}): View
+    {
+        {{ editViewData }}
+        return view('{{ kebabName }}.edit', compact('{{ modelVariable }}'{{ editCompact }}));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Update{{ class }}Request $request, {{ class }} ${{ modelVariable }}): RedirectResponse
+    {
+        ${{ modelVariable }}->update($request->validated());
+        
+        return redirect()
+            ->route('{{ kebabName }}.show', ${{ modelVariable }})
+            ->with('success', '{{ class }} updated successfully.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{ class }} ${{ modelVariable }}): RedirectResponse
+    {
+        ${{ modelVariable }}->delete();
+        
+        return redirect()
+            ->route('{{ kebabName }}.index')
+            ->with('success', '{{ class }} deleted successfully.');
+    }
+}

@@ -144,7 +144,7 @@ Generate specific components with Laravel-style flags:
 
 ```bash
 # Create new models with fields and related components
-php artisan make:model+ User --fields="name:string,email:string" -mfR   # Model + Migration + Factory + Requests
+php artisan make:model+ User --fields="name:string,email:string" -mfRS   # Model + Migration + Factory + Requests + Service
 php artisan make:model+ Post --fields="title:string,content:text,status:enum:draft,published" -a  # Everything
 
 # Generate components from existing models (auto-detects fields)
@@ -155,6 +155,26 @@ php artisan make:request+ Post
 
 # Override auto-detection with explicit fields
 php artisan make:controller+ CustomController --fields="name:string,type:enum:basic,premium"
+```
+
+### Smart Service Layer Integration
+
+Controllers are **automatically generated** based on service availability:
+
+| Scenario | Controller Template | Behavior |
+|----------|-------------------|----------|
+| **Service exists** or `-S` flag used | With service injection | `$this->service->create()`, `$this->service->paginate()` |
+| **No service** and no `-S` flag | Direct model usage | `Model::create()`, `Model::paginate()` |
+
+```bash
+# Creates controller with service injection (and creates service if needed)
+php artisan make:controller+ ArticleController -S
+
+# Creates controller with direct model usage (no service)
+php artisan make:controller+ ArticleController
+
+# If ArticleService already exists, controller will automatically use it
+php artisan make:controller+ ArticleController  # Auto-detects existing service
 ```
 
 ### Complete Module Generation
@@ -368,8 +388,8 @@ Templates will be published to `resources/stubs/laravel-generator/`
 
 | Command | Description | Laravel-style Flags | Auto-Detection |
 |---------|-------------|-------------------|----------------|
-| `make:model+` | Enhanced model generator | `-m`, `-c`, `-r`, `-R`, `-f`, `-s`, `-p`, `-a` | ✅ For new models: interactive/manual |
-| `make:controller+` | Enhanced controller generator | `-m`, `-r`, `--api`, `--requests`, `--resources` | ✅ From existing models |
+| `make:model+` | Enhanced model generator | `-m`, `-c`, `-r`, `-R`, `-S`, `-f`, `-s`, `-p`, `-a` | ✅ For new models: interactive/manual |
+| `make:controller+` | Enhanced controller generator | `-m`, `-r`, `-S`, `--api`, `--requests`, `--resources` | ✅ From existing models |
 | `make:view+` | Enhanced view generator | `--single-page`, `--separate-views` | ✅ From existing models |
 | `make:request+` | Form request generator | `--store`, `--update` | ✅ From existing models |
 | `make:resource+` | API resource generator | `--collection` | ✅ From existing models |
@@ -382,6 +402,7 @@ Templates will be published to `resources/stubs/laravel-generator/`
 | `-c` | `--controller` | Also create controller | `app/Http/Controllers/*Controller.php` |
 | `-r` | `--resource` | Create resource controller | Resource controller with CRUD methods |
 | `-R` | `--requests` | Also create form requests | `app/Http/Requests/Store*Request.php`, `app/Http/Requests/Update*Request.php` |
+| `-S` | `--service` | Also create service class | `app/Services/*Service.php` |
 | `-f` | `--factory` | Also create factory | `database/factories/*Factory.php` |
 | `-s` | `--seed` | Also create seeder | `database/seeders/*Seeder.php` |
 | `-p` | `--policy` | Also create policy | `app/Policies/*Policy.php` |
@@ -399,19 +420,22 @@ Templates will be published to `resources/stubs/laravel-generator/`
 
 ```bash
 # Model generator flags (requires --fields for new models)
-php artisan make:model+ Product --fields="name:string,price:decimal" -mcRf
+php artisan make:model+ Product --fields="name:string,price:decimal" -mcRSf
 php artisan make:model+ User --fields="name:string,email:string" -a
-php artisan make:model+ Post --fields="title:string,content:text" -mcrRfsp
+php artisan make:model+ Post --fields="title:string,content:text" -mcrRSfsp
 
 # Interactive model creation (prompts for fields)
 php artisan make:model+ Category -m    # Will prompt for fields interactively
 
-# Specific combinations
-php artisan make:model+ Article --fields="title:string,content:text" -mR   # Model + Migration + Requests
-php artisan make:model+ Order --fields="total:decimal,status:enum:pending,completed" -mcR --api
+# Specific combinations with service layer
+php artisan make:model+ Article --fields="title:string,content:text" -mRS   # Model + Migration + Requests + Service
+php artisan make:model+ Order --fields="total:decimal,status:enum:pending,completed" -mcRS --api
+
+# Controller generation with service layer
+php artisan make:controller+ ProductController -S        # Auto-detects fields + creates service
+php artisan make:controller+ UserController -mS         # Migration + Service + Controller
 
 # Other generators (auto-detect from existing models)
-php artisan make:controller+ ProductController -mr        # Auto-detects from Product model
 php artisan make:view+ products --single-page            # Auto-detects from Product model
 php artisan make:request+ User --store                   # Auto-detects from User model
 ```

@@ -15,15 +15,22 @@ class ControllerGenerator extends BaseGenerator
             return __DIR__.'/../Stubs/controller.api.stub';
         }
 
+        // Check if service exists or should be used
+        $useService = $this->shouldUseService();
+
         // Detect UI framework
         $detector = new UIFrameworkDetector($this->files);
         $framework = $detector->detect();
         
         if ($framework['name'] === 'breeze' && $framework['has_authentication']) {
-            return __DIR__.'/../Stubs/controller.breeze.stub';
+            return $useService 
+                ? __DIR__.'/../Stubs/controller.breeze.stub'
+                : __DIR__.'/../Stubs/controller.breeze.no-service.stub';
         }
         
-        return __DIR__.'/../Stubs/controller.stub';
+        return $useService 
+            ? __DIR__.'/../Stubs/controller.stub'
+            : __DIR__.'/../Stubs/controller.no-service.stub';
     }
 
     /**
@@ -40,6 +47,21 @@ class ControllerGenerator extends BaseGenerator
     protected function getNamespace(): string
     {
         return 'App\\Http\\Controllers';
+    }
+
+    /**
+     * Check if service should be used in controller.
+     */
+    protected function shouldUseService(): bool
+    {
+        // If service option is explicitly set, use it
+        if (isset($this->options['service'])) {
+            return $this->options['service'];
+        }
+
+        // Check if service file exists
+        $servicePath = app_path('Services/' . $this->getClassName() . 'Service.php');
+        return $this->files->exists($servicePath);
     }
 
     /**

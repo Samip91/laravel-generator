@@ -9,6 +9,7 @@ use Brikshya\LaravelGenerator\Traits\HandlesFields;
 use Brikshya\LaravelGenerator\Generators\ControllerGenerator;
 use Brikshya\LaravelGenerator\Generators\RequestGenerator;
 use Brikshya\LaravelGenerator\Generators\ResourceGenerator;
+use Brikshya\LaravelGenerator\Generators\ServiceGenerator;
 
 class MakeControllerPlusCommand extends Command
 {
@@ -22,6 +23,7 @@ class MakeControllerPlusCommand extends Command
                             {--m|migration : Also create migration}
                             {--model= : Model to use (defaults to controller name)}
                             {--r|resource : Generate resource controller}
+                            {--S|service : Also create service class}
                             {--api : Generate API controller}
                             {--requests : Generate form request classes}
                             {--resources : Generate API resource classes}
@@ -55,6 +57,10 @@ class MakeControllerPlusCommand extends Command
 
         if ($this->option('migration')) {
             $this->generateMigration($modelName, $fields, $options);
+        }
+
+        if ($this->option('service')) {
+            $this->generateService($modelName, $fields, $options);
         }
 
         $this->generateController($name, $fields, $options);
@@ -117,6 +123,7 @@ class MakeControllerPlusCommand extends Command
         return [
             'api' => $this->option('api'),
             'resource' => $this->option('resource'),
+            'service' => $this->option('service'),
             'force' => $this->option('force'),
         ];
     }
@@ -132,6 +139,16 @@ class MakeControllerPlusCommand extends Command
         ]);
         
         $this->line('✓ Migration created');
+    }
+
+    /**
+     * Generate service.
+     */
+    protected function generateService(string $modelName, array $fields, array $options): void
+    {
+        $generator = new ServiceGenerator($this->files, $modelName, $fields, $options);
+        $generator->generate();
+        $this->line('✓ Service created');
     }
 
     /**
@@ -177,6 +194,10 @@ class MakeControllerPlusCommand extends Command
         if ($this->option('migration')) {
             $tableName = Str::snake(Str::plural($modelName));
             $this->line("  Migration: database/migrations/create_{$tableName}_table.php");
+        }
+        
+        if ($this->option('service')) {
+            $this->line("  Service: app/Services/{$className}Service.php");
         }
         
         if ($this->option('requests')) {

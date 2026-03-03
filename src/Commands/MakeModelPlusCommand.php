@@ -13,6 +13,7 @@ use Brikshya\LaravelGenerator\Generators\FactoryGenerator;
 use Brikshya\LaravelGenerator\Generators\SeederGenerator;
 use Brikshya\LaravelGenerator\Generators\PolicyGenerator;
 use Brikshya\LaravelGenerator\Generators\RequestGenerator;
+use Brikshya\LaravelGenerator\Generators\ServiceGenerator;
 
 class MakeModelPlusCommand extends Command
 {
@@ -27,10 +28,11 @@ class MakeModelPlusCommand extends Command
                             {--c|controller : Also create controller}
                             {--r|resource : Create resource controller}
                             {--R|requests : Also create form request classes}
+                            {--S|service : Also create service class}
                             {--f|factory : Also create factory}
                             {--s|seed : Also create seeder}
                             {--p|policy : Also create policy}
-                            {--a|all : Create migration, factory, seeder, policy, resource controller, and form requests}
+                            {--a|all : Create migration, factory, seeder, policy, resource controller, form requests, and service}
                             {--api : Create API controller instead of web controller}
                             {--force : Overwrite existing files}';
 
@@ -84,6 +86,10 @@ class MakeModelPlusCommand extends Command
 
         if ($this->option('requests') || $this->option('all')) {
             $this->generateRequests($name, $fields, $options);
+        }
+
+        if ($this->option('service') || $this->option('all')) {
+            $this->generateService($name, $fields, $options);
         }
 
         $this->info('Model generated successfully!');
@@ -211,6 +217,16 @@ class MakeModelPlusCommand extends Command
     }
 
     /**
+     * Generate service.
+     */
+    protected function generateService(string $name, array $fields, array $options): void
+    {
+        $generator = new ServiceGenerator($this->files, $name, $fields, $options);
+        $generator->generate();
+        $this->line('✓ Service created');
+    }
+
+    /**
      * Display the generated files.
      */
     protected function displayGeneratedFiles(string $name, array $options): void
@@ -245,6 +261,10 @@ class MakeModelPlusCommand extends Command
         if ($this->option('requests') || $this->option('all')) {
             $this->line("  Store Request: app/Http/Requests/Store{$className}Request.php");
             $this->line("  Update Request: app/Http/Requests/Update{$className}Request.php");
+        }
+        
+        if ($this->option('service') || $this->option('all')) {
+            $this->line("  Service: app/Services/{$className}Service.php");
         }
 
         $this->newLine();
