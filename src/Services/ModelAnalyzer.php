@@ -74,22 +74,6 @@ class ModelAnalyzer
             ];
         }
         
-        // Add relationship fields
-        $relationships = $this->detectRelationships($reflection);
-        foreach ($relationships as $relationship) {
-            if ($relationship['type'] === 'belongsTo') {
-                $foreignKey = $relationship['foreign_key'] ?? Str::snake($relationship['name']) . '_id';
-                if (!collect($fields)->where('name', $foreignKey)->count()) {
-                    $fields[] = [
-                        'name' => $foreignKey,
-                        'type' => 'foreign',
-                        'nullable' => true,
-                        'source' => 'model_relationship'
-                    ];
-                }
-            }
-        }
-        
         return $fields;
     }
 
@@ -140,25 +124,6 @@ class ModelAnalyzer
                     if ($fieldIndex !== false) {
                         $fields[$fieldIndex]['type'] = $this->mapCastToFieldType($castType);
                     }
-                }
-            }
-        }
-        
-        // Detect belongsTo relationships
-        preg_match_all('/public\s+function\s+(\w+)\s*\(\s*\)\s*[:\s]*\w*\s*\{\s*return\s+\$this->belongsTo\s*\(\s*([^,)]+)/', $content, $relationMatches);
-        
-        if (isset($relationMatches[1])) {
-            foreach ($relationMatches[1] as $relationName) {
-                $foreignKey = Str::snake($relationName) . '_id';
-                
-                // Add foreign key field if not already present
-                if (!collect($fields)->where('name', $foreignKey)->count()) {
-                    $fields[] = [
-                        'name' => $foreignKey,
-                        'type' => 'foreign',
-                        'nullable' => true,
-                        'source' => 'file_relationship'
-                    ];
                 }
             }
         }
