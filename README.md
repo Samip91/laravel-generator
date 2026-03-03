@@ -144,8 +144,8 @@ Generate specific components with Laravel-style flags:
 
 ```bash
 # Create new models with fields and related components
-php artisan make:model+ User --fields="name:string,email:string" -mf
-php artisan make:model+ Post --fields="title:string,content:text,status:enum:draft,published" -a
+php artisan make:model+ User --fields="name:string,email:string" -mfR   # Model + Migration + Factory + Requests
+php artisan make:model+ Post --fields="title:string,content:text,status:enum:draft,published" -a  # Everything
 
 # Generate components from existing models (auto-detects fields)
 php artisan make:controller+ ProductController --requests --resources
@@ -368,22 +368,47 @@ Templates will be published to `resources/stubs/laravel-generator/`
 
 | Command | Description | Laravel-style Flags | Auto-Detection |
 |---------|-------------|-------------------|----------------|
-| `make:model+` | Enhanced model generator | `-m`, `-c`, `-r`, `-f`, `-s`, `-p`, `-a` | ✅ For new models: interactive/manual |
+| `make:model+` | Enhanced model generator | `-m`, `-c`, `-r`, `-R`, `-f`, `-s`, `-p`, `-a` | ✅ For new models: interactive/manual |
 | `make:controller+` | Enhanced controller generator | `-m`, `-r`, `--api`, `--requests`, `--resources` | ✅ From existing models |
 | `make:view+` | Enhanced view generator | `--single-page`, `--separate-views` | ✅ From existing models |
 | `make:request+` | Form request generator | `--store`, `--update` | ✅ From existing models |
 | `make:resource+` | API resource generator | `--collection` | ✅ From existing models |
 
-### Enhanced Laravel-style Flags
+### Laravel-style Flags for `make:model+`
+
+| Flag | Long Form | Description | Generated Files |
+|------|-----------|-------------|----------------|
+| `-m` | `--migration` | Also create migration | `database/migrations/create_*_table.php` |
+| `-c` | `--controller` | Also create controller | `app/Http/Controllers/*Controller.php` |
+| `-r` | `--resource` | Create resource controller | Resource controller with CRUD methods |
+| `-R` | `--requests` | Also create form requests | `app/Http/Requests/Store*Request.php`, `app/Http/Requests/Update*Request.php` |
+| `-f` | `--factory` | Also create factory | `database/factories/*Factory.php` |
+| `-s` | `--seed` | Also create seeder | `database/seeders/*Seeder.php` |
+| `-p` | `--policy` | Also create policy | `app/Policies/*Policy.php` |
+| `-a` | `--all` | Create **everything** | All of the above components |
+
+### Additional Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--fields` | Define model fields explicitly | `--fields="name:string,email:string"` |
+| `--api` | Create API controller instead of web | Creates API routes structure |
+| `--force` | Overwrite existing files | Replaces existing files without prompt |
+
+### Enhanced Laravel-style Flags Examples
 
 ```bash
 # Model generator flags (requires --fields for new models)
-php artisan make:model+ Product --fields="name:string,price:decimal" -mcrf
+php artisan make:model+ Product --fields="name:string,price:decimal" -mcRf
 php artisan make:model+ User --fields="name:string,email:string" -a
-php artisan make:model+ Post --fields="title:string,content:text" -mcrfsp
+php artisan make:model+ Post --fields="title:string,content:text" -mcrRfsp
 
 # Interactive model creation (prompts for fields)
 php artisan make:model+ Category -m    # Will prompt for fields interactively
+
+# Specific combinations
+php artisan make:model+ Article --fields="title:string,content:text" -mR   # Model + Migration + Requests
+php artisan make:model+ Order --fields="total:decimal,status:enum:pending,completed" -mcR --api
 
 # Other generators (auto-detect from existing models)
 php artisan make:controller+ ProductController -mr        # Auto-detects from Product model

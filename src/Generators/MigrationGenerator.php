@@ -67,10 +67,10 @@ class MigrationGenerator extends BaseGenerator
 
         // Add indexes
         foreach ($fields as $field) {
-            if ($field['unique']) {
+            if (isset($field['unique']) && $field['unique']) {
                 $migrationFields[] = '$table->unique(\''.$field['name'].'\');';
             }
-            if ($field['index']) {
+            if (isset($field['index']) && $field['index']) {
                 $migrationFields[] = '$table->index(\''.$field['name'].'\');';
             }
         }

@@ -12,6 +12,7 @@ use Brikshya\LaravelGenerator\Generators\ControllerGenerator;
 use Brikshya\LaravelGenerator\Generators\FactoryGenerator;
 use Brikshya\LaravelGenerator\Generators\SeederGenerator;
 use Brikshya\LaravelGenerator\Generators\PolicyGenerator;
+use Brikshya\LaravelGenerator\Generators\RequestGenerator;
 
 class MakeModelPlusCommand extends Command
 {
@@ -25,10 +26,11 @@ class MakeModelPlusCommand extends Command
                             {--m|migration : Also create migration}
                             {--c|controller : Also create controller}
                             {--r|resource : Create resource controller}
+                            {--R|requests : Also create form request classes}
                             {--f|factory : Also create factory}
                             {--s|seed : Also create seeder}
                             {--p|policy : Also create policy}
-                            {--a|all : Create migration, factory, seeder, policy, and resource controller}
+                            {--a|all : Create migration, factory, seeder, policy, resource controller, and form requests}
                             {--api : Create API controller instead of web controller}
                             {--force : Overwrite existing files}';
 
@@ -78,6 +80,10 @@ class MakeModelPlusCommand extends Command
 
         if ($this->option('policy') || $this->option('all')) {
             $this->generatePolicy($name, $fields, $options);
+        }
+
+        if ($this->option('requests') || $this->option('all')) {
+            $this->generateRequests($name, $fields, $options);
         }
 
         $this->info('Model generated successfully!');
@@ -195,6 +201,16 @@ class MakeModelPlusCommand extends Command
     }
 
     /**
+     * Generate form requests.
+     */
+    protected function generateRequests(string $name, array $fields, array $options): void
+    {
+        $generator = new RequestGenerator($this->files, $name, $fields, $options);
+        $generator->generate();
+        $this->line('✓ Form requests created');
+    }
+
+    /**
      * Display the generated files.
      */
     protected function displayGeneratedFiles(string $name, array $options): void
@@ -224,6 +240,11 @@ class MakeModelPlusCommand extends Command
         
         if ($this->option('policy') || $this->option('all')) {
             $this->line("  Policy: app/Policies/{$className}Policy.php");
+        }
+        
+        if ($this->option('requests') || $this->option('all')) {
+            $this->line("  Store Request: app/Http/Requests/Store{$className}Request.php");
+            $this->line("  Update Request: app/Http/Requests/Update{$className}Request.php");
         }
 
         $this->newLine();

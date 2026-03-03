@@ -222,7 +222,7 @@ class RequestGenerator extends BaseGenerator
         }
 
         // Unique rule
-        if ($field['unique']) {
+        if (isset($field['unique']) && $field['unique']) {
             $table = $this->getSnakeName();
             if ($context === 'update') {
                 $rules[] = "unique:{$table},{$field['name']},{\$this->route('".Str::singular($table)."')}";

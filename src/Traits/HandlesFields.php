@@ -72,6 +72,8 @@ trait HandlesFields
                 'name' => $field['name'],
                 'type' => $field['type'],
                 'nullable' => $field['nullable'] ?? true,
+                'unique' => false, // Default for auto-detected fields
+                'index' => false, // Default for auto-detected fields
             ];
             
             // Add type-specific options
@@ -118,6 +120,8 @@ trait HandlesFields
                 'name' => $name,
                 'type' => $type,
                 'nullable' => true, // Default
+                'unique' => false, // Default
+                'index' => false, // Default
             ];
             
             // Parse type-specific options
@@ -252,6 +256,8 @@ trait HandlesFields
                 'name' => $name,
                 'type' => $type,
                 'nullable' => $this->confirm('Is this field nullable?', true),
+                'unique' => $this->confirm('Should this field be unique?', false),
+                'index' => $this->confirm('Should this field be indexed?', false),
             ];
             
             // Type-specific prompts
