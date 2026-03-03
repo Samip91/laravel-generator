@@ -5,6 +5,7 @@ namespace Brikshya\LaravelGenerator\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use Brikshya\LaravelGenerator\Traits\HandlesFields;
 use Brikshya\LaravelGenerator\Generators\MigrationGenerator;
 use Brikshya\LaravelGenerator\Generators\ModelGenerator;
 use Brikshya\LaravelGenerator\Generators\ControllerGenerator;
@@ -20,6 +21,7 @@ use Brikshya\LaravelGenerator\Generators\ViewGenerator;
 
 class MakeModuleCommand extends Command
 {
+    use HandlesFields;
     /**
      * The name and signature of the console command.
      */
@@ -73,85 +75,19 @@ class MakeModuleCommand extends Command
      */
     protected function parseFields(): array
     {
+        $modelName = $this->argument('name');
         $fieldsOption = $this->option('fields');
         
-        if (empty($fieldsOption)) {
-            return $this->promptForFields();
+        $fields = $this->getFieldDefinitions($modelName, $fieldsOption);
+        $this->validateFields($fields);
+        
+        if (!empty($fields)) {
+            $this->displayDetectedFields($fields, $fieldsOption ? 'fields option' : 'auto-detection');
         }
-
-        $fields = [];
-        foreach (explode(',', $fieldsOption) as $field) {
-            $parts = explode(':', trim($field));
-            $name = $parts[0];
-            $type = $parts[1] ?? 'string';
-            $options = array_slice($parts, 2);
-
-            $fields[] = [
-                'name' => $name,
-                'type' => $type,
-                'options' => $options,
-                'nullable' => false,
-                'unique' => false,
-                'index' => false,
-            ];
-        }
-
+        
         return $fields;
     }
 
-    /**
-     * Prompt user for fields interactively.
-     */
-    protected function promptForFields(): array
-    {
-        $fields = [];
-        
-        $this->info('Define fields for your model (press enter with empty name to finish):');
-        
-        while (true) {
-            $name = $this->ask('Field name');
-            
-            if (empty($name)) {
-                break;
-            }
-
-            $type = $this->choice('Field type', [
-                'string', 'text', 'integer', 'bigInteger', 'decimal', 'float', 'double',
-                'boolean', 'date', 'datetime', 'timestamp', 'time', 'json',
-                'enum', 'foreign', 'uuid'
-            ], 'string');
-
-            $options = [];
-            
-            if ($this->confirm('Is this field nullable?')) {
-                $options[] = 'nullable';
-            }
-
-            if ($this->confirm('Should this field be unique?')) {
-                $options[] = 'unique';
-            }
-
-            if ($this->confirm('Should this field be indexed?')) {
-                $options[] = 'index';
-            }
-
-            if ($type === 'enum') {
-                $enumValues = $this->ask('Enum values (comma-separated)', 'active,inactive');
-                $options = array_merge($options, explode(',', $enumValues));
-            }
-
-            $fields[] = [
-                'name' => $name,
-                'type' => $type,
-                'options' => $options,
-                'nullable' => in_array('nullable', $options),
-                'unique' => in_array('unique', $options),
-                'index' => in_array('index', $options),
-            ];
-        }
-
-        return $fields;
-    }
 
     /**
      * Get command options.

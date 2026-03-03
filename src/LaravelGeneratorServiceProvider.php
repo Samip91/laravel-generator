@@ -4,6 +4,11 @@ namespace Brikshya\LaravelGenerator;
 
 use Illuminate\Support\ServiceProvider;
 use Brikshya\LaravelGenerator\Commands\MakeModuleCommand;
+use Brikshya\LaravelGenerator\Commands\MakeModelPlusCommand;
+use Brikshya\LaravelGenerator\Commands\MakeControllerPlusCommand;
+use Brikshya\LaravelGenerator\Commands\MakeViewPlusCommand;
+use Brikshya\LaravelGenerator\Commands\MakeRequestPlusCommand;
+use Brikshya\LaravelGenerator\Commands\MakeResourcePlusCommand;
 
 class LaravelGeneratorServiceProvider extends ServiceProvider
 {
@@ -26,6 +31,11 @@ class LaravelGeneratorServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakeModuleCommand::class,
+                MakeModelPlusCommand::class,
+                MakeControllerPlusCommand::class,
+                MakeViewPlusCommand::class,
+                MakeRequestPlusCommand::class,
+                MakeResourcePlusCommand::class,
             ]);
 
             // Publish configuration file
@@ -59,6 +69,11 @@ class LaravelGeneratorServiceProvider extends ServiceProvider
     {
         return [
             MakeModuleCommand::class,
+            MakeModelPlusCommand::class,
+            MakeControllerPlusCommand::class,
+            MakeViewPlusCommand::class,
+            MakeRequestPlusCommand::class,
+            MakeResourcePlusCommand::class,
         ];
     }
 }
