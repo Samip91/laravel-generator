@@ -433,6 +433,8 @@ class ViewGenerator extends BaseGenerator
      */
     protected function buildBreezeFormField(array $field, string $label, string $name, string $oldValue, string $required): string
     {
+        $modelVar = $this->getCamelName();
+        
         return match($field['type']) {
             'text' => '<div>
     <x-input-label for="'.$name.'" :value="__(\''.addslashes($label).'\')" />
