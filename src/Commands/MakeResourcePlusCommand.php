@@ -62,13 +62,33 @@ class MakeResourcePlusCommand extends Command
     {
         $fieldsOption = $this->option('fields');
         
+        // Check if model exists for auto-detection
+        if (!$fieldsOption && !$this->modelExists($modelName)) {
+            $this->error("Model '{$modelName}' not found for auto-detection.");
+            $this->line("Either:");
+            $this->line("  1. Create the model first: php artisan make:model+ {$modelName} --fields=\"name:string,email:string\"");
+            $this->line("  2. Provide explicit fields: php artisan make:resource+ " . $this->argument('name') . " --fields=\"name:string,email:string\"");
+            throw new \InvalidArgumentException("Model '{$modelName}' not found. Create the model first or use --fields option.");
+        }
+        
         $fields = $this->getFieldDefinitions($modelName, $fieldsOption);
         
         if (!empty($fields)) {
             $this->displayDetectedFields($fields, $fieldsOption ? 'fields option' : 'model analysis');
+        } elseif (!$fieldsOption) {
+            $this->warn("No fields detected from model '{$modelName}'. API resources will be created with basic structure.");
         }
         
         return $fields;
+    }
+
+    /**
+     * Check if model class exists.
+     */
+    protected function modelExists(string $modelName): bool
+    {
+        $modelClass = "App\\Models\\" . Str::studly(Str::singular($modelName));
+        return class_exists($modelClass) || $this->files->exists(app_path("Models/" . Str::studly(Str::singular($modelName)) . ".php"));
     }
 
     /**

@@ -87,20 +87,25 @@ class MakeModelPlusCommand extends Command
     }
 
     /**
-     * Parse fields from the command option or auto-detect.
+     * Parse fields from the command option or prompt for new models.
      */
     protected function parseFields(string $modelName): array
     {
         $fieldsOption = $this->option('fields');
         
-        // For new models, try to get fields from input or interactive mode
+        // For new models, we need explicit fields or interactive input
         if (!$fieldsOption) {
-            $this->info("No --fields option provided. Creating new model structure.");
             if ($this->isInteractive()) {
+                $this->info("No --fields option provided. Let's define the model fields interactively.");
                 $fields = $this->promptForFields();
             } else {
-                $fields = []; // Empty fields array for basic model
-                $this->warn("No fields defined. Creating basic model structure.");
+                $this->error("No fields defined for new model '{$modelName}'.");
+                $this->line("Please provide fields using --fields option:");
+                $this->line("  php artisan make:model+ {$modelName} --fields=\"name:string,email:string\"");
+                $this->line("");
+                $this->line("Or run interactively (without --quiet flag):");
+                $this->line("  php artisan make:model+ {$modelName}");
+                throw new \InvalidArgumentException("Fields are required when creating a new model. Use --fields option or run interactively.");
             }
         } else {
             $fields = $this->parseFieldsString($fieldsOption);
@@ -110,6 +115,8 @@ class MakeModelPlusCommand extends Command
         
         if (!empty($fields)) {
             $this->displayDetectedFields($fields, $fieldsOption ? 'fields option' : 'interactive input');
+        } else {
+            $this->warn("No fields defined. Model will be created with basic structure only.");
         }
         
         return $fields;

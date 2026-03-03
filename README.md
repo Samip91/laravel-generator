@@ -126,13 +126,16 @@ promptDialog('Enter Name', 'Product name').then(result => {
 The generators now **automatically detect fields** from existing models! No more manual --fields required:
 
 ```bash
-# Auto-detect fields from existing Post model
-php artisan make:controller+ PostController
-php artisan make:view+ posts --model=Post
-php artisan make:request+ Post
+# Step 1: Create model with fields first
+php artisan make:model+ Product --fields="name:string,price:decimal,description:text" -m
 
-# Generate model with related components using Laravel-style flags
-php artisan make:model+ Product -mcr  # Model + Migration + Controller + Resource
+# Step 2: Auto-detect from existing model for other components
+php artisan make:controller+ ProductController  # Auto-detects from Product model
+php artisan make:view+ products --model=Product  # Auto-detects from Product model
+php artisan make:request+ Product               # Auto-detects from Product model
+
+# Or generate model with multiple components at once
+php artisan make:model+ User --fields="name:string,email:string,role:enum:admin,user" -mcr
 ```
 
 ### Individual Component Generators
@@ -140,20 +143,18 @@ php artisan make:model+ Product -mcr  # Model + Migration + Controller + Resourc
 Generate specific components with Laravel-style flags:
 
 ```bash
-# Model with migration and factory
-php artisan make:model+ User -mf
+# Create new models with fields and related components
+php artisan make:model+ User --fields="name:string,email:string" -mf
+php artisan make:model+ Post --fields="title:string,content:text,status:enum:draft,published" -a
 
-# Controller with requests and resources  
+# Generate components from existing models (auto-detects fields)
 php artisan make:controller+ ProductController --requests --resources
-
-# Views with single-page modal interface
 php artisan make:view+ products --single-page
-
-# API resources with collection
 php artisan make:resource+ Product --collection
+php artisan make:request+ Post
 
-# Form requests for validation
-php artisan make:request+ Product
+# Override auto-detection with explicit fields
+php artisan make:controller+ CustomController --fields="name:string,type:enum:basic,premium"
 ```
 
 ### Complete Module Generation
@@ -376,18 +377,18 @@ Templates will be published to `resources/stubs/laravel-generator/`
 ### Enhanced Laravel-style Flags
 
 ```bash
-# Model generator flags (same as Laravel + more)
-php artisan make:model+ Product -mcrf    # Model + Migration + Controller + Resource + Factory
-php artisan make:model+ User -a          # All: Model + Migration + Controller + Factory + Seeder + Policy
-php artisan make:model+ Post -mcrfsp     # Model + Migration + Controller + Resource + Factory + Seeder + Policy
+# Model generator flags (requires --fields for new models)
+php artisan make:model+ Product --fields="name:string,price:decimal" -mcrf
+php artisan make:model+ User --fields="name:string,email:string" -a
+php artisan make:model+ Post --fields="title:string,content:text" -mcrfsp
 
-# Controller generator flags  
-php artisan make:controller+ ProductController -mr        # Controller + Migration + Resource
-php artisan make:controller+ UserController --api --requests --resources
+# Interactive model creation (prompts for fields)
+php artisan make:model+ Category -m    # Will prompt for fields interactively
 
-# View generator flags
-php artisan make:view+ products --single-page   # Single-page CRUD with modals
-php artisan make:view+ users --separate-views   # Traditional separate views
+# Other generators (auto-detect from existing models)
+php artisan make:controller+ ProductController -mr        # Auto-detects from Product model
+php artisan make:view+ products --single-page            # Auto-detects from Product model
+php artisan make:request+ User --store                   # Auto-detects from User model
 ```
 
 ### Module Generator (Complete Solution)
@@ -430,20 +431,37 @@ The generator intelligently detects fields using a priority system:
 | **Migration files** | Column types, lengths, nullable | `$table->string('name', 100)->nullable();` |
 | **Relationships** | Foreign keys from belongsTo methods | `public function user() { return $this->belongsTo(User::class); }` |
 
+### Recommended Workflow
+
+```bash
+# 1. Create model with fields first (required for new models)
+php artisan make:model+ Post --fields="title:string,content:text,status:enum:draft,published" -m
+
+# 2. Generate other components that auto-detect from the model
+php artisan make:controller+ PostController    # Auto-detects: title, content, status
+php artisan make:view+ posts --single-page     # Auto-detects and creates modal forms
+php artisan make:request+ Post                 # Auto-detects with smart validation
+
+# 3. Or do it all at once with the model generator
+php artisan make:model+ Product --fields="name:string,price:decimal,description:text" -mcr
+
+# 4. For existing models, components auto-detect seamlessly
+php artisan make:controller+ UserController --api    # Auto-detects from existing User model
+```
+
 ### Auto-Detection Examples
 
 ```bash
-# Controller for existing Post model - auto-detects all Post fields
-php artisan make:controller+ PostController
-
-# Views for existing Product model with custom name
-php artisan make:view+ admin/products --model=Product
-
-# Requests for User model - generates validation from model fields
-php artisan make:request+ User
+# These work when models already exist
+php artisan make:controller+ PostController     # Auto-detects from Post model
+php artisan make:view+ admin/products --model=Product  # Auto-detects from Product model
+php artisan make:request+ User                  # Auto-detects from User model
 
 # Override auto-detection when needed
 php artisan make:controller+ PostController --fields="title:string,content:text"
+
+# Error handling - helpful messages when model doesn't exist
+php artisan make:view+ orders  # Will show: "Model 'Order' not found. Create it first or use --fields"
 ```
 
 ### Interactive Mode
