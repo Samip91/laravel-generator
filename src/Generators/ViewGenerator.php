@@ -356,7 +356,8 @@ class ViewGenerator extends BaseGenerator
     {
         $label = Str::title(str_replace('_', ' ', $field['name']));
         $name = $field['name'];
-        $oldValue = "old('{$name}', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : '')";
+        $modelVar = $this->getCamelName();
+        $oldValue = "old('{$name}', isset(\${$modelVar}) ? \${$modelVar}->{$name} : '')";
         $required = $field['nullable'] ? '' : ' required';
 
         // Detect foreign key fields
@@ -379,7 +380,7 @@ class ViewGenerator extends BaseGenerator
             
             'boolean' => '<div class="mb-4">
     <div class="flex items-center">
-        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded border-gray-300 shadow-sm" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : false) ? \'checked\' : \'\' }}>
+        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded border-gray-300 shadow-sm" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name} : false) ? \'checked\' : \'\' }}>
         <label for="'.$name.'" class="ml-2 block text-sm text-gray-900">'.$label.'</label>
     </div>
     @error(\''.$name.'\')
@@ -392,7 +393,7 @@ class ViewGenerator extends BaseGenerator
     <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
         <option value="">Select '.$label.'</option>
         @foreach(\\App\\Enums\\'.Str::studly($name).'Enum::cases() as $case)
-            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
+            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
                 {{ $case->label() }}
             </option>
         @endforeach
@@ -407,7 +408,7 @@ class ViewGenerator extends BaseGenerator
     <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"'.$required.'>
         <option value="">Select '.$label.'</option>
         @foreach(${{ '.Str::camel(Str::plural(Str::beforeLast($name, '_id'))).' }} as $item)
-            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
+            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
                 {{ $item->name ?? $item->title ?? $item->id }}
             </option>
         @endforeach
@@ -441,7 +442,7 @@ class ViewGenerator extends BaseGenerator
             
             'boolean' => '<div>
     <label for="'.$name.'" class="inline-flex items-center">
-        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : false) ? \'checked\' : \'\' }}>
+        <input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name} : false) ? \'checked\' : \'\' }}>
         <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ __(\''.addslashes($label).'\') }}</span>
     </label>
     <x-input-error :messages="$errors->get(\''.$name.'\')" class="mt-2" />
@@ -452,7 +453,7 @@ class ViewGenerator extends BaseGenerator
     <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"'.$required.'>
         <option value="">{{ __(\'Select '.addslashes($label).'\') }}</option>
         @foreach(\\App\\Enums\\'.Str::studly($name).'Enum::cases() as $case)
-            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
+            <option value="{{ $case->value }}" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name}?->value : null) === $case->value ? \'selected\' : \'\' }}>
                 {{ $case->label() }}
             </option>
         @endforeach
@@ -465,7 +466,7 @@ class ViewGenerator extends BaseGenerator
     <select id="'.$name.'" name="'.$name.'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"'.$required.'>
         <option value="">{{ __(\'Select '.addslashes($label).'\') }}</option>
         @foreach(${{ '.Str::camel(Str::plural(Str::beforeLast($name, '_id'))).' }} as $item)
-            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\${{ modelVariable }}) ? \${{ modelVariable }}->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
+            <option value="{{ $item->id }}" {{ old(\''.$name.'\', isset(\$'.$modelVar.') ? \$'.$modelVar.'->{$name} : null) == $item->id ? \'selected\' : \'\' }}>
                 {{ $item->name ?? $item->title ?? $item->id }}
             </option>
         @endforeach
